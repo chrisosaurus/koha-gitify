@@ -1,0 +1,161 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use File::Copy; # used for making backups of files pre-modification
+
+=pod
+
+=head1 NAME
+
+koha-gitify - convert koha instance created via the package's koha-create into git instance
+
+=head1 SYNOPSIS
+
+koha-gitify I<instance> I<clone>
+
+=head1 DESCRIPTION
+
+I<instance>
+    name of koha instance to convert
+
+I<clone>
+    path to koha git clone
+
+=head1 COPYRIGHT
+
+Copyright 2012 Chris Hall, Catalyst IT Ltd. <chrish AT catalyst.net.nz>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, see <http://www.gnu.org/licenses>.
+
+=head1 TODO
+
+consider handling zebradb definition links
+
+=head1 BUGS
+
+report them <chrish AT catalyst.net.nz>
+
+=cut
+
+# this script will take apache-shared-opac.conf and create a apache-shared-opac-git.conf that can be shared amoungst all git instances (it leaves DocumentRoot and ScriptAlis config up to sites-enabled/instance)
+# this script will also modify koha-conf.xml and sites-enabled/instance
+
+if( @ARGV < 2 ){
+    die "need moar arguments, takes an instancename and a path to the git checkout (absolute path, ie /home/chris/devel rather than devel)";
+}
+if( @ARGV > 2 ){
+    die "I don't understand all those arguments, I only take an instance name and an absolute path to the git checkout";
+}
+
+
+my $instancename = $ARGV[0];
+my $gitcheckout = $ARGV[1];
+$gitcheckout =~ s#/$##; # destroy trailing /
+
+# roll call
+unless( -d "$gitcheckout" ){
+    die "git checkout not found at ($gitcheckout)\n";
+}
+
+unless( -e "/etc/koha/sites/$instancename" ){
+    die "instance not found at ($instancename)\n";
+}
+
+print "gitifying $instancename (/etc/koha/sites/$instancename) to point at '$gitcheckout'\n";
+
+# takes from filename, to filename, and replace hashref
+# where each key in replace will be replaced by its value when moving each line from 'from' to 'to'
+sub build {
+    my $from = shift or die '"from" argument required for build';
+    my $to = shift or die '"to" argument required missing for build';
+    my $replace = shift or die '"replaces" argument required missing for build';
+
+    open( my $ffile, "<", $from ) or die "Failed to open $from : $!\n";
+    open( my $tfile, ">", $to ) or die "Failed to open $to : $!\n";
+    for my $line ( <$ffile> ){
+        for my $key ( keys %$replace ){
+            my $val = $replace->{$key};
+            $line =~ s#$key#$val#g;
+        }
+        print $tfile $line;
+    }
+    close $ffile;
+    close $tfile;
+}
+
+# apache opac conf
+my $oconf = '/etc/koha/apache-shared-opac.conf';
+my $ogit = '/etc/koha/apache-shared-opac-git.conf';
+my %replaces = (
+    # comment out DocumentRoot and ScriptAlias as these are handled in sites-available/instance
+    '^DocumentRoot' => '#DocumentRoot',
+    '^ScriptAlias' => '#ScriptAlias',
+);
+unless(-e $ogit){ # reuse opac git conf if it exists
+    build($oconf, $ogit, \%replaces);
+} else {
+    print "reusing existing $ogit\n";
+}
+
+# apache intranet conf
+my $iconf = '/etc/koha/apache-shared-intranet.conf';
+my $igit =  '/etc/koha/apache-shared-intranet-git.conf';
+%replaces = (
+    # comment out DocumentRoot and ScriptAlias as these are handled in sites-available/instance
+    '^DocumentRoot' => '#DocumentRoot',
+    '^ScriptAlias' => '#ScriptAlias',
+);
+unless(-e $igit){ # reuse intranet git conf if it exists
+    build($iconf, $igit, \%replaces);
+} else {
+    print "reusing existsin $igit\n";
+}
+
+# koha conf
+my $kconf = "/etc/koha/sites/$instancename/koha-conf.xml";
+copy($kconf, "$kconf.bkp");
+%replaces = (
+    '/usr/share/koha/intranet/cgi-bin' => "$gitcheckout", # intranetdir
+    '/usr/share/koha/intranet/htdocs/intranet-tmpl' => "$gitcheckout/koha-tmpl/intranet-tmpl", # intrahtdocs and includes
+    '/usr/share/koha/opac/cgi-bin/opac' => "$gitcheckout/opac", # opacdir
+    '/usr/share/koha/opac/htdocs/opac-tmpl' => "$gitcheckout/koha-tmpl/opac-tmpl", # opachtdocs
+);
+build("$kconf.bkp", $kconf, \%replaces);
+
+# apache site-enabled conf
+my $aconf = "/etc/apache2/sites-enabled/$instancename";
+copy($aconf, "$aconf.bkp");
+%replaces = (
+    # replace this ...                           with all of this
+    'Include /etc/koha/apache-shared-opac.conf' => "Include /etc/koha/apache-shared-opac-git.conf\n\n" # opac apache conf
+    . "   SetEnv PERL5LIB \"$gitcheckout\"\n"
+    . "   DocumentRoot $gitcheckout/koha-tmpl\n"
+    . "   ScriptAlias /cgi-bin/koha/ \"$gitcheckout/opac/\"\n"
+    . "   ScriptAlias /index.html \"$gitcheckout/opac/opac-main.pl\"\n"
+    . "   ScriptAlias /search \"$gitcheckout/opac/opac-search.pl\"\n"
+    . "   ScriptAlias /opac-search.pl \"$gitcheckout/opac/opac-search.pl\"",
+
+    # replace this ...                               with all of this
+    'Include /etc/koha/apache-shared-intranet.conf' => "Include /etc/koha/apache-shared-intranet-git.conf\n\n" # intranet apache conf
+    . "   SetEnv PERL5LIB \"$gitcheckout\"\n"   
+    . "   DocumentRoot $gitcheckout/koha-tmpl\n"
+    . "   ScriptAlias /cgi-bin/koha/ \"$gitcheckout/\"\n"
+    . "   ScriptAlias /index.html \"$gitcheckout/mainpage.pl\"\n"
+    . "   ScriptAlias /search \"$gitcheckout/search.pl\"",
+);
+build("$aconf.bkp", $aconf, \%replaces);
+
+print "I appear to be done...\n"
+
+
