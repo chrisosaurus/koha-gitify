@@ -134,7 +134,7 @@ copy($kconf, "$kconf.bkp");
 build("$kconf.bkp", $kconf, \%replaces);
 
 # apache site-enabled conf
-my $aconf = "/etc/apache2/sites-enabled/$instancename";
+my $aconf = "/etc/apache2/sites-available/$instancename";
 copy($aconf, "$aconf.bkp");
 %replaces = (
     # replace this ...                           with all of this
