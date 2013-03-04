@@ -44,12 +44,13 @@ consider handling zebradb definition links
 
 =head1 BUGS
 
-report them <chrish AT catalyst.net.nz>
+report them <chrish AT catalyst.net.nz> or https://github.com/mkfifo/koha-gitify/issues
 
 =cut
 
-# this script will take apache-shared-opac.conf and create a apache-shared-opac-git.conf that can be shared amoungst all git instances (it leaves DocumentRoot and ScriptAlis config up to sites-enabled/instance)
-# this script will also modify koha-conf.xml and sites-enabled/instance
+# this script will take apache-shared-opac.conf and create a apache-shared-opac-git.conf that can be shared amoungst all git instances (it leaves DocumentRoot and ScriptAlias config up to sites-enabled/instance)
+# this script will also modify koha-conf.xml and sites-available/instance
+# every file modified will be backed up first by appending a '.bkp' to the file name
 
 if( @ARGV < 2 ){
     die "need moar arguments, takes an instancename and a path to the git checkout (absolute path, ie /home/chris/devel rather than devel)";
@@ -119,7 +120,7 @@ my $igit =  '/etc/koha/apache-shared-intranet-git.conf';
 unless(-e $igit){ # reuse intranet git conf if it exists
     build($iconf, $igit, \%replaces);
 } else {
-    print "reusing existsin $igit\n";
+    print "reusing existing $igit\n";
 }
 
 # koha conf
