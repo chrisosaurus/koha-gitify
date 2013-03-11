@@ -3,51 +3,6 @@ use strict;
 use warnings;
 use File::Copy; # used for making backups of files pre-modification
 
-=pod
-
-=head1 NAME
-
-koha-gitify - convert koha instance created via the package's koha-create into git instance
-
-=head1 SYNOPSIS
-
-koha-gitify I<instance> I<clone>
-
-=head1 DESCRIPTION
-
-I<instance>
-    name of koha instance to convert
-
-I<clone>
-    path to koha git clone
-
-=head1 COPYRIGHT
-
-Copyright 2012 Chris Hall, Catalyst IT Ltd. <chrish AT catalyst.net.nz>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of 
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, see <http://www.gnu.org/licenses>.
-
-=head1 TODO
-
-consider handling zebradb definition links
-
-=head1 BUGS
-
-report them <chrish AT catalyst.net.nz> or https://github.com/mkfifo/koha-gitify/issues
-
-=cut
-
 # this script will take apache-shared-opac.conf and create a apache-shared-opac-git.conf that can be shared amoungst all git instances (it leaves DocumentRoot and ScriptAlias config up to sites-enabled/instance)
 # this script will also modify koha-conf.xml and sites-available/instance
 # every file modified will be backed up first by appending a '.bkp' to the file name
@@ -157,6 +112,51 @@ copy($aconf, "$aconf.bkp");
 );
 build("$aconf.bkp", $aconf, \%replaces);
 
-print "I appear to be done...\n"
+print "\nI appear to be done...\n";
+print "Please remember to restart apache before trying to use '$instancename' ;) \n";
 
+=pod
+
+=head1 NAME
+
+koha-gitify - convert koha instance created via the package's koha-create into git instance
+
+=head1 SYNOPSIS
+
+koha-gitify I<instance> I<clone>
+
+=head1 DESCRIPTION
+
+I<instance>
+    name of koha instance to convert
+
+I<clone>
+    path to koha git clone
+
+=head1 COPYRIGHT
+
+Copyright 2012 Chris Hall, Catalyst IT Ltd. <chrish AT catalyst.net.nz>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, see <http://www.gnu.org/licenses>.
+
+=head1 TODO
+
+consider handling zebradb definition links
+
+=head1 BUGS
+
+report them <chrish AT catalyst.net.nz> or https://github.com/mkfifo/koha-gitify/issues
+
+=cut
 
