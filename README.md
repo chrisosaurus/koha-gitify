@@ -20,4 +20,14 @@ Instructions for use:
     # /path/to/koha/clone should be the path to your koha git clone
     ./koha-gitify instance-name /path/to/koha/clone
 
+Installing:
+-----------
+
+If you want koha-gitify to live in a more permanent position you can install it with
+
+    sudo make install
+
+If you get sick of it then simply
+
+    sudo make uninstall
 
