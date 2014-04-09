@@ -74,7 +74,7 @@ you may have to install it with
 
 Find a place you want to store Koha, your home directory works nicely.
 
-   git clone git://git.koha-community.org/koha.git   
+    git clone git://git.koha-community.org/koha.git
 
 now we have a fresh copy of the Koha codebase (in our Koha folder)
 Next, we need to get the koha-gitify script and make it executable 
@@ -106,32 +106,34 @@ db user is: koha_mykoha
 to get the db password, execute the following:
 
     sudo xmlstarlet sel -t -v 'yazgfs/config/pass' /etc/koha/sites/mykoha/koha-conf.xml
+
 (again, if you changed your instance name, replace 'mykoha' with your instance name)
 
 Step through the Koha Installer
 
 Now we are going to step through Koha's web installer. Please specify the following options:
-*Step 1: En -> Next
 
-*Dependencies ok -> Next
+* Step 1: En -> Next
 
-*Database settings ok -> Next
+* Dependencies ok -> Next
 
-*Confirm -> Next
+* Database settings ok -> Next
 
-*Step 3: -> Next, wait a tick
+* Confirm -> Next
 
-*Success -> Next
+* Step 3: -> Next, wait a tick
 
-*Click the link "install basic configuration settings"
+* Success -> Next
 
-*MARC Flavor: Tick Marc21 -> Next
+* Click the link "install basic configuration settings"
 
-*Now: Tick all the boxes! 
+* MARC Flavor: Tick Marc21 -> Next
 
-*Click import, wait a tick
+* Now: Tick all the boxes! 
 
-*Success! -> Finish
+* Click import, wait a tick
+
+* Success! -> Finish
 
 If you now see a Koha login page, celebrate!
 
@@ -140,22 +142,23 @@ Log in with your credentials
 
 You will see a yellow box alert saying "You're logged in with the database administrator..."
 
-*Click the link for "create a patron" 
-** Give it a surname, a OPAC/Staff login and password, and click "Save"
+* Click the link for "create a patron" 
 
-*This should bring you back to a patron detail. 
+* Give it a surname, a OPAC/Staff login and password, and click "Save"
 
-*Click More 
+* This should bring you back to a patron detail. 
 
-*Click Set Permissions 
+* Click More 
 
-*Tick the box for "Superlibrarian" 
+* Click Set Permissions 
 
-*Click Set Flags 
+* Tick the box for "Superlibrarian" 
 
-*Click Log out in the upper right hand corner 
+* Click Set Flags 
 
-*Log in again with your new username and password. Now we are ready to rock with an installed Koha. 
+* Click Log out in the upper right hand corner 
+
+* Log in again with your new username and password. Now we are ready to rock with an installed Koha. 
 
 Celebrate!
 
