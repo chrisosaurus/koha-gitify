@@ -28,7 +28,7 @@ These steps will install the Koha package from the current stable package availa
 
 Type the following into your terminal: 
 
-   echo deb http://debian.koha-community.org/koha squeeze main | sudo tee /etc/apt/sources.list.d/koha.list
+    echo deb http://debian.koha-community.org/koha squeeze main | sudo tee /etc/apt/sources.list.d/koha.list
 
 install the key (to keep apt-get happy)
 
@@ -105,23 +105,33 @@ db user is: koha_mykoha
 
 to get the db password, execute the following:
 
-sudo xmlstarlet sel -t -v 'yazgfs/config/pass' /etc/koha/sites/mykoha/koha-conf.xml
+    sudo xmlstarlet sel -t -v 'yazgfs/config/pass' /etc/koha/sites/mykoha/koha-conf.xml
 (again, if you changed your instance name, replace 'mykoha' with your instance name)
 
 Step through the Koha Installer
 
 Now we are going to step through Koha's web installer. Please specify the following options:
-Step 1: En -> Next
-Dependencies ok -> Next
-Database settings ok -> Next
-Confirm -> Next
-Step 3: -> Next, wait a tick
-Success -> Next
-Click the link "install basic configuration settings"
-MARC Flavor: Tick Marc21 -> Next
-Now: Tick all the boxes! 
-Click import, wait a tick
-Success! -> Finish
+*Step 1: En -> Next
+
+*Dependencies ok -> Next
+
+*Database settings ok -> Next
+
+*Confirm -> Next
+
+*Step 3: -> Next, wait a tick
+
+*Success -> Next
+
+*Click the link "install basic configuration settings"
+
+*MARC Flavor: Tick Marc21 -> Next
+
+*Now: Tick all the boxes! 
+
+*Click import, wait a tick
+
+*Success! -> Finish
 
 If you now see a Koha login page, celebrate!
 
@@ -129,31 +139,48 @@ Log in with your credentials
 ----------------------------
 
 You will see a yellow box alert saying "You're logged in with the database administrator..."
-Click the link for "create a patron" 
+
+*Click the link for "create a patron" 
 ** Give it a surname, a OPAC/Staff login and password, and click "Save"
-This should bring you back to a patron detail. 
-Click More 
-Click Set Permissions 
-Tick the box for "Superlibrarian" 
-Click Set Flags 
-Click Log out in the upper right hand corner 
-Log in again with your new username and password. Now we are ready to rock with an installed Koha. 
+
+*This should bring you back to a patron detail. 
+
+*Click More 
+
+*Click Set Permissions 
+
+*Tick the box for "Superlibrarian" 
+
+*Click Set Flags 
+
+*Click Log out in the upper right hand corner 
+
+*Log in again with your new username and password. Now we are ready to rock with an installed Koha. 
+
 Celebrate!
 
 Useful Links
 ------------
 
 Using Git with Koha
-http://wiki.koha-community.org/wiki/Version_Control_Using_Git
-See the database schema and how it is laid out
-http://schema.koha-community.org/
-Information about signing off on patches
-http://wiki.koha-community.org/wiki/Sign_off_on_patches
-Using Git-BZ to attach patches to bugs
-http://wiki.koha-community.org/wiki/Git_bz_configuration
-Read Koha documentation: 
-http://www.koha-community.org/documentation
 
+http://wiki.koha-community.org/wiki/Version_Control_Using_Git
+
+See the database schema and how it is laid out
+
+http://schema.koha-community.org/
+
+Information about signing off on patches
+
+http://wiki.koha-community.org/wiki/Sign_off_on_patches
+
+Using Git-BZ to attach patches to bugs
+
+http://wiki.koha-community.org/wiki/Git_bz_configuration
+
+Read Koha documentation: 
+
+http://www.koha-community.org/documentation
 
 Installing koha-gitify in a permanent location (advanced uses):
 -----------------------------------------------
