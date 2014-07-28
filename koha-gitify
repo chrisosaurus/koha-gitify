@@ -91,6 +91,13 @@ build("$kconf.bkp", $kconf, \%replaces);
 
 # apache site-enabled conf
 my $aconf = "/etc/apache2/sites-available/$instancename";
+
+# if we can't find sites-available/instancename try appending .conf
+# newer version of koha use this naming sheme
+unless (-e $aconf){
+    $aconf .= '.conf';
+}
+
 copy($aconf, "$aconf.bkp");
 %replaces = (
     # replace this ...                           with all of this
