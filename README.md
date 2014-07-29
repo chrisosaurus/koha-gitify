@@ -185,7 +185,7 @@ Read Koha documentation:
 
 http://www.koha-community.org/documentation
 
-Installing koha-gitify in a permanent location (advanced uses):
+Installing koha-gitify in a permanent location (advanced users):
 -----------------------------------------------
 
 If you want koha-gitify to live in a more permanent position you can install it with
