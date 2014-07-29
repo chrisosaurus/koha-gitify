@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use File::Copy; # used for making backups of files pre-modification
+use File::Copy 'copy'; # used for making backups of files pre-modification
 
 # this script will take apache-shared-opac.conf and create a apache-shared-opac-git.conf that can be shared amoungst all git instances (it leaves DocumentRoot and ScriptAlias config up to sites-enabled/instance)
 # this script will also modify koha-conf.xml and sites-available/instance
@@ -50,6 +50,21 @@ sub build {
     close $tfile;
 }
 
+# wrapper for File::Copy::copy to handle error cases
+sub copy_wrapper {
+    my $from = shift or die '"from" argument required for copy_wrapper';
+    my $to   = shift or die '"to" argument required for copy_wrapper';
+
+    die "from file '$from' not found" unless -e $from;
+
+    # function returns 1 on success, 0 on failure.
+    my $ret = copy($from, $to);
+
+    unless ($ret){
+        die "Call to File::Copy::copy($from, $to) failed with return code '$ret' and gave error '$!'\n";
+    }
+}
+
 # apache opac conf
 my $oconf = '/etc/koha/apache-shared-opac.conf';
 my $ogit = '/etc/koha/apache-shared-opac-git.conf';
@@ -80,7 +95,7 @@ unless(-e $igit){ # reuse intranet git conf if it exists
 
 # koha conf
 my $kconf = "/etc/koha/sites/$instancename/koha-conf.xml";
-copy($kconf, "$kconf.bkp");
+copy_wrapper($kconf, "$kconf.bkp");
 %replaces = (
     '/usr/share/koha/intranet/cgi-bin' => "$gitcheckout", # intranetdir
     '/usr/share/koha/intranet/htdocs/intranet-tmpl' => "$gitcheckout/koha-tmpl/intranet-tmpl", # intrahtdocs and includes
@@ -98,7 +113,7 @@ unless (-e $aconf){
     $aconf .= '.conf';
 }
 
-copy($aconf, "$aconf.bkp");
+copy_wrapper($aconf, "$aconf.bkp");
 %replaces = (
     # replace this ...                           with all of this
     'Include /etc/koha/apache-shared-opac.conf' => "Include /etc/koha/apache-shared-opac-git.conf\n\n" # opac apache conf
