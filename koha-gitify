@@ -8,10 +8,10 @@ use File::Copy 'copy'; # used for making backups of files pre-modification
 # every file modified will be backed up first by appending a '.bkp' to the file name
 
 if( @ARGV < 2 ){
-    die "need moar arguments, takes an instancename and a path to the git checkout (absolute path, ie /home/chris/devel rather than devel)";
+    die "ERROR: need moar arguments, takes an instancename and a path to the git checkout (absolute path, ie /home/chris/devel rather than devel)";
 }
 if( @ARGV > 2 ){
-    die "I don't understand all those arguments, I only take an instance name and an absolute path to the git checkout";
+    die "ERROR: I don't understand all those arguments, I only take an instance name and an absolute path to the git checkout";
 }
 
 
@@ -21,11 +21,11 @@ $gitcheckout =~ s#/$##; # destroy trailing /
 
 # roll call
 unless( -d "$gitcheckout" ){
-    die "git checkout not found at ($gitcheckout)\n";
+    die "ERROR: git checkout not found at ($gitcheckout)\n";
 }
 
 unless( -e "/etc/koha/sites/$instancename" ){
-    die "instance not found at ($instancename)\n";
+    die "ERROR: instance not found at ($instancename)\n";
 }
 
 print "gitifying $instancename (/etc/koha/sites/$instancename) to point at '$gitcheckout'\n";
@@ -33,12 +33,12 @@ print "gitifying $instancename (/etc/koha/sites/$instancename) to point at '$git
 # takes from filename, to filename, and replace hashref
 # where each key in replace will be replaced by its value when moving each line from 'from' to 'to'
 sub build {
-    my $from = shift or die '"from" argument required for build';
-    my $to = shift or die '"to" argument required missing for build';
-    my $replace = shift or die '"replaces" argument required missing for build';
+    my $from = shift or die 'INTERNAL ERROR: "from" argument required for build';
+    my $to = shift or die 'INTERNAL ERROR: "to" argument required missing for build';
+    my $replace = shift or die 'INTERNAL ERROR: "replaces" argument required missing for build';
 
-    open( my $ffile, "<", $from ) or die "Failed to open $from : $!\n";
-    open( my $tfile, ">", $to ) or die "Failed to open $to : $!\n";
+    open( my $ffile, "<", $from ) or die "ERROR: Failed to open $from : $!\n";
+    open( my $tfile, ">", $to ) or die "ERROR: Failed to open $to : $!\n";
     for my $line ( <$ffile> ){
         for my $key ( keys %$replace ){
             my $val = $replace->{$key};
@@ -52,16 +52,16 @@ sub build {
 
 # wrapper for File::Copy::copy to handle error cases
 sub copy_wrapper {
-    my $from = shift or die '"from" argument required for copy_wrapper';
-    my $to   = shift or die '"to" argument required for copy_wrapper';
+    my $from = shift or die 'INTERNAL ERROR: "from" argument required for copy_wrapper';
+    my $to   = shift or die 'INTERNAL ERROR: "to" argument required for copy_wrapper';
 
-    die "from file '$from' not found" unless -e $from;
+    die "ERROR: from file '$from' not found" unless -e $from;
 
     # function returns 1 on success, 0 on failure.
     my $ret = copy($from, $to);
 
     unless ($ret){
-        die "Call to File::Copy::copy($from, $to) failed with return code '$ret' and gave error '$!'\n";
+        die "ERROR: Call to File::Copy::copy($from, $to) failed with return code '$ret' and gave error '$!'\n";
     }
 }
 
