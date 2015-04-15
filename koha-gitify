@@ -15,18 +15,51 @@ if( @ARGV > 2 ){
 }
 
 
-my $instancename = $ARGV[0];
-my $gitcheckout = $ARGV[1];
-$gitcheckout =~ s#/$##; # destroy trailing /
+my $first  = $ARGV[0];
+my $second = $ARGV[1];
+$first =~ s#/$##; # destroy trailing /
+$second =~ s#/$##; # destroy trailing /
 
-# roll call
-unless( -d "$gitcheckout" ){
-    die "ERROR: git checkout not found at ($gitcheckout)\n";
+my( $instancename, $gitcheckout );
+
+# arg checking
+# we want to allow to have both instancename and gitcheckout specified in ANY order
+{
+    # try determine which looks like a directory and which an instance name
+    my $first_dir     = -d "$first";
+    my $second_dir    = -d "$second";
+    my $first_apache  = -e "/etc/koha/sites/$first";
+    my $second_apache = -e "/etc/koha/sites/$second";
+
+
+    # check we have at least one that looks like a directory
+    unless( $first_dir or $second_dir ){
+        die "ERROR: git checkouts not found at either '$first' or '$second'\n";
+    }
+
+    # check we have at least one that looks like an instance
+    unless( $first_apache or $second_apache ){
+        die "ERROR: instances not found at either '$first' or '$second'\n";
+    }
+
+    # we only need to check for ambiguity if our first and second args are not the same
+    unless( $first eq $second ){
+        my $dir_ambig    = $first_dir && $second_dir;
+        my $apache_ambig = $first_apache && $second_apache;
+
+        if( $dir_ambig ){
+            die "ERROR: unabel to tell instance and checkout apart as both are valid directory paths '$first' and '$second'\n";
+        } elsif( $apache_ambig ){
+            die "ERROR: unabel to tell instance and checkout apart as both are valid koha instances '$first' and '$second'\n";
+        }
+    }
+
+    # we made it!
+    # pick which is which
+    $instancename = $first_dir ? $first : $second;
+    $gitcheckout  = $first_apache ? $first : $second;
 }
 
-unless( -e "/etc/koha/sites/$instancename" ){
-    die "ERROR: instance not found at ($instancename)\n";
-}
 
 print "gitifying $instancename (/etc/koha/sites/$instancename) to point at '$gitcheckout'\n";
 
