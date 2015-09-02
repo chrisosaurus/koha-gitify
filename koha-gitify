@@ -30,12 +30,17 @@ unless( -e "/etc/koha/sites/$instancename" ){
 
 print "gitifying $instancename (/etc/koha/sites/$instancename) to point at '$gitcheckout'\n";
 
-# takes from filename, to filename, and replace hashref
-# where each key in replace will be replaced by its value when moving each line from 'from' to 'to'
+# takes from filename, to filename, and replace hashref and some
+# string to append at the bottom of the file
+# Each key in the replace hashref will be replaced by its value
+# when moving each line from 'from' to 'to'
+
 sub build {
+
     my $from = shift or die 'INTERNAL ERROR: "from" argument required for build';
     my $to = shift or die 'INTERNAL ERROR: "to" argument required missing for build';
     my $replace = shift or die 'INTERNAL ERROR: "replaces" argument required missing for build';
+    my $append = shift;
 
     open( my $ffile, "<", $from ) or die "ERROR: Failed to open $from : $!\n";
     open( my $tfile, ">", $to ) or die "ERROR: Failed to open $to : $!\n";
@@ -46,6 +51,11 @@ sub build {
         }
         print $tfile $line;
     }
+
+    if ( $append ) {
+        print $tfile $append;
+    }
+
     close $ffile;
     close $tfile;
 }
@@ -73,8 +83,19 @@ my %replaces = (
     '^DocumentRoot' => '#DocumentRoot',
     '^ScriptAlias' => '#ScriptAlias',
 );
+
+my $append = qq{
+
+<IfVersion >= 2.4>
+    <Directory "$gitcheckout">
+        Require all granted
+    </Directory>
+</IfVersion>
+
+};
+
 unless(-e $ogit){ # reuse opac git conf if it exists
-    build($oconf, $ogit, \%replaces);
+    build( $oconf, $ogit, \%replaces, $append );
 } else {
     print "reusing existing $ogit\n";
 }
@@ -88,7 +109,7 @@ my $igit =  '/etc/koha/apache-shared-intranet-git.conf';
     '^ScriptAlias' => '#ScriptAlias',
 );
 unless(-e $igit){ # reuse intranet git conf if it exists
-    build($iconf, $igit, \%replaces);
+    build( $iconf, $igit, \%replaces, $append );
 } else {
     print "reusing existing $igit\n";
 }
