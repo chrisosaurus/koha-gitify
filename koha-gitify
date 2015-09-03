@@ -132,7 +132,21 @@ my $aconf = "/etc/apache2/sites-available/$instancename";
 # newer version of koha use this naming sheme
 unless (-e $aconf){
     $aconf .= '.conf';
+    copy_wrapper($aconf, "$aconf.bkp");
+    %replaces = (
+    # Indranil Das Gupta - adding Apache 2.4 support for gitified install's DOCROOT
+    # replace this ...                           with all of this
+    '# Koha instance kohamaster Apache config.' => "# Koha instance kohamaster Apache config.\n\n"
+    . "# Add Apache 2.4 support for gitified install\n"
+    . "<Directory $gitcheckout>\n"
+    . "   Options Indexes FollowSymLinks\n"
+    . "   AllowOverride None\n"
+    . "   Require all granted\n"
+    . "</Directory>\n\n",
+);
 }
+
+build("$aconf.bkp", $aconf, \%replaces);
 
 copy_wrapper($aconf, "$aconf.bkp");
 %replaces = (
