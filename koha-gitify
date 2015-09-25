@@ -157,7 +157,19 @@ copy_wrapper($aconf, "$aconf.bkp");
 build("$aconf.bkp", $aconf, \%replaces);
 
 # process plack.psgi
-my $plack_file = "/etc/koha/plack.psgi"; # default plack file
+my $plack_file;
+my $default_plack_file = "/etc/koha/plack.psgi"; # default plack file
+my $instance_plack_file = "/etc/koha/sites/$instancename/plack.psgi"; # instance-specific plack file
+# koha-gitify will install an instance-specifig plack file.
+# first test if it is already created
+if ( -e $instance_plack_file ) {
+    # exists, use as basis
+    $plack_file = $instance_plack_file;
+} else {
+    # doesn't exist, use the default
+    $plack_file = $default_plack_file;
+}
+
 if ( -e $plack_file) {
     # backup the file
     copy_wrapper( $plack_file, "$plack_file.bkp" );
@@ -167,7 +179,7 @@ if ( -e $plack_file) {
         '/usr/share/koha/api'               => "$gitcheckout/api",
         '/usr/share/koha/opac/cgi-bin/opac' => "$gitcheckout/opac"
     );
-    build( "$plack_file.bkp", $plack_file, \%replaces);
+    build( "$plack_file.bkp", $instance_plack_file, \%replaces);
 }
 
 print "\nI appear to be done...\n";
