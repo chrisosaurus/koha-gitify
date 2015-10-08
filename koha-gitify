@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
-use strict;
-use warnings;
+
+use Modern::Perl;
+
 use File::Copy 'copy'; # used for making backups of files pre-modification
 
 # this script will take apache-shared-opac.conf and create a apache-shared-opac-git.conf that can be shared amoungst all git instances (it leaves DocumentRoot and ScriptAlias config up to sites-enabled/instance)
@@ -154,6 +155,32 @@ copy_wrapper($aconf, "$aconf.bkp");
     . "   ScriptAlias /search \"$gitcheckout/search.pl\"",
 );
 build("$aconf.bkp", $aconf, \%replaces);
+
+# process plack.psgi
+my $plack_file;
+my $default_plack_file = "/etc/koha/plack.psgi"; # default plack file
+my $instance_plack_file = "/etc/koha/sites/$instancename/plack.psgi"; # instance-specific plack file
+# koha-gitify will install an instance-specifig plack file.
+# first test if it is already created
+if ( -e $instance_plack_file ) {
+    # exists, use as basis
+    $plack_file = $instance_plack_file;
+} else {
+    # doesn't exist, use the default
+    $plack_file = $default_plack_file;
+}
+
+if ( -e $plack_file) {
+    # backup the file
+    copy_wrapper( $plack_file, "$plack_file.bkp" );
+    %replaces = (
+        '/usr/share/koha/lib'               => $gitcheckout,
+        '/usr/share/koha/intranet/cgi-bin'  => $gitcheckout,
+        '/usr/share/koha/api'               => "$gitcheckout/api",
+        '/usr/share/koha/opac/cgi-bin/opac' => "$gitcheckout/opac"
+    );
+    build( "$plack_file.bkp", $instance_plack_file, \%replaces);
+}
 
 print "\nI appear to be done...\n";
 print "Please remember to restart apache before trying to use '$instancename' ;) \n";
